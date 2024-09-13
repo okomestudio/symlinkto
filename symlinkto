@@ -4,15 +4,30 @@ set -e
 
 readonly scriptname="${0##*/}"
 
-
 function usage() {
   cat <<USAGE >&2
-Usage: $scriptname arg1 [optarg2 ...]
+Usage: $scriptname
 
-This is a template for bash script.
+Create symlinks under HOME to files under a mirrored directory
+hierarchy.
 
-  arg1     Required argument
-  optarg2  Optional argument description
+The environment variable SYMLINKTO_TREE should point to the absolute
+path to the root of the mirrored directory hierarchy. This variable
+must be set before using this script.
+
+Any (real) file under SYMLINKTO_TREE become candidates for symlinks.
+
+The main use case is to maintain (configuration) files that we do not
+want to put under version control in a different repository. For
+example, Emacs's .dir-locals.el mechanism allows directory-dependent
+configurations by just creating the file under a target directory.
+However, it is often not desirable to put editor-specific files under
+version control for share. In that case, we "mirror" the directory
+hierarchy under SYMLINKTO_TREE, have .dir-locals.el files there, and
+then run symlinkto to create symlinks linking to them under the actual
+version-controlled directories.
+
+Source code: https://github.com/okomestudio/symlinkto
 
 USAGE
   exit "${1:-1}"
@@ -26,18 +41,48 @@ function error() {
 }
 
 
+here=$(pwd)
+here="${here/#\~/$HOME}"
+
+
 function main() {
-  echo "$@"
+  target_tree="$SYMLINKTO_TREE"
+  if [ -z "$target_tree" ]; then
+    error "Set SYMLINKTO_TREE before using symlinkto"
+  fi
+  target_tree="${target_tree/#\~/$HOME}"
+
+  for target in $(tree -afiF --prune --noreport "$here"); do
+    if [ -f "$target" ]; then
+      echo -n "Target: ~/${target/$target_tree/} ... "
+
+      link="$HOME/${target/$target_tree/}"
+      link_parent="$(dirname $link)"
+      if [ -L "$link" ]; then
+        echo "already symlinked"
+      elif [ -e "$link" ]; then
+        echo "file exists"
+      elif [ ! -d "$link_parent" ]; then
+        echo "parent directory missing"
+      else
+        echo -n "not yet symlinked. "
+        read -p 'Create? [y/N]: ' resp
+        resp=${resp:-n}
+        if [ $resp = "Y" ] || [ $resp = "y" ]; then
+          ln -s "$target" "$link"
+          echo "Link created"
+        else
+          echo "Link skipped"
+        fi
+      fi
+    fi
+  done
 }
 
 
 if [ "$0" = "${BASH_SOURCE[0]}" ]; then
-  while getopts "ha:" opt; do
+  while getopts "h" opt; do
     case $opt in
-      a)
-        optarg=$OPTARG
-        echo "$optarg"
-        ;;
       h|\?)
         if [ "$opt" = "h" ]; then usage 0; else usage; fi
         ;;
