@@ -75,7 +75,14 @@ Now, let us have such a version-controlled repository at
 ```
 
 In this case, we set `SYMLINKTO_TREE` to
-`~/github.com/okomestudio/dotfiles`.
+`~/github.com/okomestudio/dotfiles`, which we should set
+
+``` shell
+export SYMLINKTO_TREE=~/github.com/okomestudio/dotfiles
+```
+
+in either one of shell startup file (e.g., `.bashrc`) or with `.envrc`
+of `direnv`.
 
 Then, after running `symlinkto`, we create the following symlinks:
 
@@ -99,5 +106,5 @@ $ cd $SYMLINKTO_TREE
 $ symlinkto
 ```
 
-For each symlink target that exists under `SYMLINKTO_TREE`, the prompt
-asks whether to create or remove the symlink.
+For each symlink target that exists in and under the current working
+directory, the prompt asks whether to create or remove the symlink.
