@@ -6,7 +6,7 @@ readonly scriptname="${0##*/}"
 readonly version=0.9
 
 here=$(pwd)
-here="${here/#\~/$HOME}"
+here="${here/#\~/$HOME}/"
 
 
 function usage() {
@@ -49,6 +49,10 @@ function main() {
     error "Set SYMLINKTO_TREE before using symlinkto"
   fi
   target_tree="${target_tree/#\~/$HOME}/"
+
+  if [[ ! "$here" == "$target_tree"* ]]; then
+    error "Not in or under $SYMLINKTO_TREE"
+  fi
 
   for target in $(tree -afiF --prune --noreport "$here"); do
     if [ -f "$target" ]; then
