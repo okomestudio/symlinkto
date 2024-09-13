@@ -56,11 +56,11 @@ function go_back_to_prev_line () {
 }
 
 function main() {
-  target_tree="$SYMLINKTO_TREE"
+  target_tree="${SYMLINKTO_TREE%/}"
   if [ -z "$target_tree" ]; then
     error "Set SYMLINKTO_TREE before using symlinkto"
   fi
-  target_tree="${target_tree/#\~/$HOME}"
+  target_tree="${target_tree/#\~/$HOME}/"
 
   for target in $(tree -afiF --prune --noreport "$here"); do
     if [ -f "$target" ]; then
