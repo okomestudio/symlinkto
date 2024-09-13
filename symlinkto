@@ -3,6 +3,11 @@
 set -e
 
 readonly scriptname="${0##*/}"
+readonly version=0.9
+
+here=$(pwd)
+here="${here/#\~/$HOME}"
+
 
 function usage() {
   cat <<USAGE >&2
@@ -29,6 +34,9 @@ version-controlled directories.
 
 Source code: https://github.com/okomestudio/symlinkto
 
+  -h   show this help
+  -v   show script version
+
 USAGE
   exit "${1:-1}"
 }
@@ -41,9 +49,11 @@ function error() {
 }
 
 
-here=$(pwd)
-here="${here/#\~/$HOME}"
-
+function go_back_to_prev_line () {
+  cols=$(tput cols)
+  n=$(( $cols - 20 ))
+  echo -en "\e[1A\e[${n}C"
+}
 
 function main() {
   target_tree="$SYMLINKTO_TREE"
@@ -54,12 +64,21 @@ function main() {
 
   for target in $(tree -afiF --prune --noreport "$here"); do
     if [ -f "$target" ]; then
-      echo -n "Target: ~/${target/$target_tree/} ... "
+      echo -n "T: ~/${target/$target_tree/} ... "
 
       link="$HOME/${target/$target_tree/}"
       link_parent="$(dirname $link)"
       if [ -L "$link" ]; then
-        echo "already symlinked"
+        echo -n "already symlinked. "
+        read -p 'Remove? [y/N]: ' resp
+        resp=${resp:-n}
+        go_back_to_prev_line
+        if [ $resp = "Y" ] || [ $resp = "y" ]; then
+          rm "$link"
+          echo "... symlink removed"
+        else
+          echo "... symlink checked"
+        fi
       elif [ -e "$link" ]; then
         echo "file exists"
       elif [ ! -d "$link_parent" ]; then
@@ -68,11 +87,12 @@ function main() {
         echo -n "not yet symlinked. "
         read -p 'Create? [y/N]: ' resp
         resp=${resp:-n}
+        go_back_to_prev_line
         if [ $resp = "Y" ] || [ $resp = "y" ]; then
           ln -s "$target" "$link"
-          echo "Link created"
+          echo "... symlink created"
         else
-          echo "Link skipped"
+          echo "... symlink skipped"
         fi
       fi
     fi
@@ -81,10 +101,13 @@ function main() {
 
 
 if [ "$0" = "${BASH_SOURCE[0]}" ]; then
-  while getopts "h" opt; do
+  while getopts "hv" opt; do
     case $opt in
       h|\?)
         if [ "$opt" = "h" ]; then usage 0; else usage; fi
+        ;;
+      v)
+        echo "$version" ; exit 0;
         ;;
     esac
   done
