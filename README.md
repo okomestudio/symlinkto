@@ -21,8 +21,8 @@ version-controlled directories.
 
 ## Install
 
-``` shell
-make
+``` shellsession
+$ make
 ```
 
 This will install the script `symlinkto` in `$HOME/.local/bin`.
@@ -98,3 +98,6 @@ run `symlinkto`:
 $ cd $SYMLINKTO_TREE
 $ symlinkto
 ```
+
+For each symlink target that exists under `SYMLINKTO_TREE`, the prompt
+asks whether to create or remove the symlink.
