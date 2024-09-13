@@ -19,7 +19,7 @@ hierarchy under SYMLINKTO_TREE, have .dir-locals.el files there, and
 then run symlinkto to create symlinks linking to them under the actual
 version-controlled directories.
 
-### Install
+## Install
 
 ``` shell
 make
@@ -27,7 +27,7 @@ make
 
 This will install the script `symlinkto` in `$HOME/.local/bin`.
 
-### Usage
+## Usage
 
 Let us first describe what we want to achieve.
 
@@ -90,3 +90,11 @@ Then, after running `symlinkto`, we create the following symlinks:
 ```
 
 There you have it. This is the basic idea of what `symlinkto` is for.
+
+To actually run, move to somewhere under the `SYMLINKTO_TREE` and then
+run `symlinkto`:
+
+``` shellsession
+$ cd $SYMLINKTO_TREE
+$ symlinkto
+```
