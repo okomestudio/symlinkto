@@ -18,3 +18,11 @@ version control for share. In that case, we "mirror" the directory
 hierarchy under SYMLINKTO_TREE, have .dir-locals.el files there, and
 then run symlinkto to create symlinks linking to them under the actual
 version-controlled directories.
+
+### Install
+
+``` shell
+make
+```
+
+This will install the script `symlinkto` in `$HOME/.local/bin`.
