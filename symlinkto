@@ -38,7 +38,7 @@ function error() {
 
 function go_back_to_prev_line () {
   cols=$(tput cols)
-  n=$(( $cols - 20 ))
+  n=$(( "$cols" - 20 ))
   echo -en "\e[1A\e[${n}C"
 }
 
@@ -49,7 +49,7 @@ function process_candidate () {
   target_tree=$2
 
   if [ -f "$target" ]; then
-    echo -n "T: ~/${target/$target_tree/} ... "
+    echo -n "T: ~${target/$target_tree/} ... "
 
     link="$HOME/${target/$target_tree/}"
     link_parent="$(dirname "$link")"
@@ -85,16 +85,17 @@ function process_candidate () {
 
 
 function main() {
-  target_tree="$(realpath "$SYMLINKTO_TREE")"
-  if [ -z "$target_tree" ]; then
+  if [ -z "$SYMLINKTO_TREE" ]; then
     error "Set SYMLINKTO_TREE before using symlinkto"
   fi
+  target_tree="$(realpath "$SYMLINKTO_TREE")"
 
-  if [[ ! "$here" == "$target_tree"* ]]; then
-    error "Not in or under $SYMLINKTO_TREE"
+  if [[ "$here" == "$target_tree"* ]]; then
+    point_under_target_tree="$here"
+  else
+    point_under_target_tree="$target_tree${here/$HOME/}"
   fi
-
-  for target in $(tree -afiF --prune --noreport "$here"); do
+  for target in $(tree -afiF --prune --noreport "$point_under_target_tree"); do
     process_candidate "$target" "$target_tree"
   done
 }
