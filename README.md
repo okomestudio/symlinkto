@@ -18,9 +18,9 @@ Consider a `$HOME` (`~`) directory tree as follows:
 
 ``` text
 ~/
-  github.com/
-    okomestudio/
-      symlinkto/
+└── github.com/
+    └── okomestudio/
+        └── symlinkto/
 ```
 
 In these directories, we want to have three files, `.bashrc`,
@@ -28,12 +28,12 @@ In these directories, we want to have three files, `.bashrc`,
 
 ``` text
 ~/
-  .bashrc
-  github.com/
-    .gitconfig
-    okomestudio/
-      symlinkto/
-        .dir-locals.el
+├── .bashrc
+└── github.com/
+    ├── .gitconfig
+    └── okomestudio/
+        └── symlinkto/
+            └── .dir-locals.el
 ```
 
 Instead of creating files there, we want to put them under version
@@ -46,15 +46,15 @@ Now, let us have such a version-controlled repository at
 
 ``` text
 ~/
-  github.com/
-    okomestudio/
-      dotfiles/
-        .bashrc
-        github.com/
-          .gitconfig
-          okomestudio/
-            symlinkto/
-              .dir-locals.el
+└── github.com/
+    └── okomestudio/
+        └── dotfiles/
+            ├── .bashrc
+            └── github.com/
+                ├── .gitconfig
+                └── okomestudio/
+                    └── symlinkto/
+                        └── .dir-locals.el
 ```
 
 In this case, we set `SYMLINKTO_TREE` to
@@ -71,12 +71,12 @@ Then, after running `symlinkto`, we create the following symlinks:
 
 ``` text
 ~/
-  .bashrc -> $SYMLINKTO_TREE/.bashrc
-  github.com/
-    .gitconfig -> $SYMLINKTO_TREE/github.com/.gitconfig
-    okomestudio/
-      symlinkto/
-        .dir-locals.el -> $SYMLINKTO_TREE/github.com/symlinkto/.dir-locals.el
+├── .bashrc -> $SYMLINKTO_TREE/.bashrc
+└── github.com/
+    ├── .gitconfig -> $SYMLINKTO_TREE/github.com/.gitconfig
+    └── okomestudio/
+        └── symlinkto/
+            └── .dir-locals.el -> $SYMLINKTO_TREE/github.com/symlinkto/.dir-locals.el
 ```
 
 There you have it. This is the basic idea of what `symlinkto` is for.
