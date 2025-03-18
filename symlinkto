@@ -3,16 +3,15 @@
 set -e
 
 readonly scriptname="${0##*/}"
-readonly version=0.9
+readonly version=1.0.0
 
 here="$(realpath "$(pwd)")"
-
 
 function usage() {
   cat <<USAGE >&2
 Usage: $scriptname
 
-Create symlinks to version-controlled files.
+Interactively create symlinks to version-controlled files.
 
 The environment variable SYMLINKTO_TREE should point to the root of
 the version-controlled repository of symlink target files.
@@ -21,13 +20,12 @@ the version-controlled repository of symlink target files.
   -v   show script version
 
  Author: Taro Sato <okomestudio@gmail.com>
-   Date: October 26, 2024
+   Date: March 18, 2025
     WWW: https://github.com/okomestudio/symlinkto
 Version: $scriptname $version
 USAGE
   exit "${1:-1}"
 }
-
 
 function error() {
   >&2 echo "$scriptname: $1"
@@ -35,15 +33,13 @@ function error() {
   exit "${2:-1}"
 }
 
-
-function go_back_to_prev_line () {
+function go_back_to_prev_line() {
   cols=$(tput cols)
-  n=$(( "$cols" - 20 ))
+  n=$(("$cols" - 20))
   echo -en "\e[1A\e[${n}C"
 }
 
-
-function process_candidate () {
+function process_candidate() {
   # 'target' is a file under SYMLINKTO_TREE (target_tree).
   target=$1
   target_tree=$2
@@ -52,7 +48,21 @@ function process_candidate () {
     echo -n "T: ~${target/$target_tree/} ... "
 
     link="$HOME/${target/$target_tree/}"
+
     link_parent="$(dirname "$link")"
+    if [ ! -d "$link_parent" ]; then
+      echo -n "parent directory missing. "
+      read -rp 'Create? [y/N]: ' resp
+      resp=${resp:-n}
+      if [ "$resp" = "Y" ] || [ "$resp" = "y" ]; then
+        mkdir "$link_parent"
+        echo -n "... parent directory created ... "
+      else
+        echo "... symlink skipped"
+        return
+      fi
+    fi
+
     if [ -L "$link" ]; then
       echo -n "already symlinked. "
       read -rp 'Remove? [y/N]: ' resp
@@ -66,8 +76,6 @@ function process_candidate () {
       fi
     elif [ -e "$link" ]; then
       echo "file exists"
-    elif [ ! -d "$link_parent" ]; then
-      echo "parent directory missing"
     else
       echo -n "not yet symlinked. "
       read -rp 'Create? [y/N]: ' resp
@@ -82,7 +90,6 @@ function process_candidate () {
     fi
   fi
 }
-
 
 function main() {
   if [ -z "$SYMLINKTO_TREE" ]; then
@@ -100,16 +107,16 @@ function main() {
   done
 }
 
-
 if [ "$0" = "${BASH_SOURCE[0]}" ]; then
   while getopts "hv" opt; do
     case $opt in
-      h|\?)
-        if [ "$opt" = "h" ]; then usage 0; else usage; fi
-        ;;
-      v)
-        echo "$version" ; exit 0;
-        ;;
+    h | \?)
+      if [ "$opt" = "h" ]; then usage 0; else usage; fi
+      ;;
+    v)
+      echo "$version"
+      exit 0
+      ;;
     esac
   done
   shift $((OPTIND - 1))
