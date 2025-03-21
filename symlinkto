@@ -3,7 +3,7 @@
 set -e
 
 readonly scriptname="${0##*/}"
-readonly version=1.0.0
+readonly version=1.1.0
 
 here="$(realpath "$(pwd)")"
 
@@ -20,7 +20,7 @@ the version-controlled repository of symlink target files.
   -v   show script version
 
  Author: Taro Sato <okomestudio@gmail.com>
-   Date: March 18, 2025
+   Date: March 21, 2025
     WWW: https://github.com/okomestudio/symlinkto
 Version: $scriptname $version
 USAGE
@@ -91,11 +91,35 @@ function process_candidate() {
   fi
 }
 
+function version_control_file() {
+  local source="$(realpath "$1")"
+  local target_tree=$2
+
+  echo -n "F: .${source/$here/} ... "
+  read -rp 'Put under version control? [y/N]: ' resp
+  resp=${resp:-n}
+  if [ "$resp" = "Y" ] || [ "$resp" = "y" ]; then
+    point_under_target_tree="$target_tree${source/$HOME/}"
+    target_parent="$(dirname "$point_under_target_tree")"
+    mkdir -p "$target_parent"
+    mv "$source" "$target_parent"
+    echo "... .${source/$here/} put under version control"
+  else
+    echo "... putting under version control skipped"
+  fi
+}
+
 function main() {
   if [ -z "$SYMLINKTO_TREE" ]; then
     error "Set SYMLINKTO_TREE before using symlinkto"
   fi
   target_tree="$(realpath "$SYMLINKTO_TREE")"
+
+  # If a file is provided as an argument, put it under version control
+  # if desired.
+  if [ -f "$1" ]; then
+    version_control_file "$1" "$target_tree"
+  fi
 
   if [[ "$here" == "$target_tree"* ]]; then
     point_under_target_tree="$here"
